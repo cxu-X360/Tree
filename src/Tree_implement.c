@@ -114,7 +114,7 @@ void tree_destroy(Tree_t* tree)
     END_FUNC
 }
 
-Node_t* _node_insert(Node_t* cur_node, Elem_t val)
+Node_t* _node_insert(Node_t* cur_node, Elem_t val, int (*cmp)(void* a, void* b))
 {
     START_FUNC
     $(printf("set_val = "FMT", cur node = [ptr = [%p], val = <"FMT">, left = [%p], right = [%p]\n", 
@@ -128,15 +128,15 @@ Node_t* _node_insert(Node_t* cur_node, Elem_t val)
         return cur_node;
     }
 
-    if (val > cur_node->val)
+    if (cmp(&val, &cur_node->val) > 0)
     {
         $(printf("right insert\n");)
-        cur_node->right = _node_insert(cur_node->right, val);
+        cur_node->right = _node_insert(cur_node->right, val, cmp);
         return cur_node;
     }
 
     $(printf("left insert\n");)
-    cur_node->left = _node_insert(cur_node->left, val);
+    cur_node->left = _node_insert(cur_node->left, val, cmp);
     return cur_node;
 }
 
@@ -159,12 +159,12 @@ int _node_link(Node_t* parent, Node_t* child, LINK_SIDE side)
     return 0;
 }
 
-int tree_insert(Tree_t* tree, Elem_t val)
+int tree_insert(Tree_t* tree, Elem_t val, int (*cmp)(void* a, void* b))
 {
     START_FUNC
     CHECK(tree);
 
-    tree->root = _node_insert(tree->root, val);
+    tree->root = _node_insert(tree->root, val, cmp);
 
     END_FUNC
     return 0;

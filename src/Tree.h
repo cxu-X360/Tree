@@ -61,7 +61,7 @@ Tree_t* tree_create();
 int tree_init(Tree_t* tree, Elem_t val);
 void tree_destroy(Tree_t* tree);
 
-int tree_insert(Tree_t* tree, Elem_t val);
+int tree_insert(Tree_t* tree, Elem_t val, int (*cmp)(void* a, void* b));
 void fprint_tree(FILE* stream, Tree_t* tree, TREE_IO_MODE mode);
 
 int tree_verificator(Tree_t* tree);
