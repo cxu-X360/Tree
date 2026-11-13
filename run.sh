@@ -17,7 +17,7 @@ clear_dir()
 
 clear_log()
 {
-	rm logs/text_logs/log.txt #clear_dir logs/text_logs/
+	clear_dir logs/text_logs/
 	clear_dir logs/dot-files/
 	clear_dir logs/pictures/
 	echo "logs deleted"
