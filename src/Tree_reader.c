@@ -6,117 +6,132 @@
 #include <sys/stat.h>
 
 #define READ_ERROR(message) do {fprintf(stderr, RED message DEFUALT);\
-                                return -1;} while(0)
+                                return NULL;} while(0)
+
+#define SHIFT_PTR(shift) for(int i = 0; i < shift; i++)(*source)++;
 
 
-static int _node_fread_preorder(Node_t* root, char** source $(, int level))
+static int _node_read_val(Node_t* node, char** source)
 {
     START_FUNC
 
-    $(printf("before reading a node cur_char = '%c'\n", **source));
-    $(printf("cur_level = %d\n", level));
-    if (**source == '{')
+    int offset = 0;
+    Elem_t val = PZ;
+    
+    if (sscanf(*source, FMT"%n", &val, &offset) != 1) return -1;
+    SHIFT_PTR(offset);
+    _node_init(node, val);
+
+    END_FUNC
+    return 0;
+}
+
+static int is_nil(char** source)
+{
+    char temp = 0;
+    int offset = 0;
+    if (sscanf(*source, "nil}%n%c", &offset, &temp) != 1)
     {
-        int offset = 0;
-        Elem_t val = PZ;
-
-        if (sscanf(*source, "{"FMT"%n[{}]", &val, &offset) != 1) 
-        {   
-            char temp = 0;
-            if (sscanf(*source, "{nil}%n%c", &offset, &temp) == 1)
-            {
-                (*source) = (*source) + offset;
-                if (_node_fread_preorder(root, source, level)) READ_ERROR("Can`t continue a recurs\n");
-                return 0;
-            }        
-        
-            READ_ERROR("Not val in node\n");
-        }
-        
-        *source = (*source) + offset;
-
-        Node_t* new_node = _node_create();
-        _node_init(new_node, val);
-
-        $(printf("after reading a node cur_char = '%c' val = <"FMT">\n", **source, val));
-        
-        if (_node_fread_preorder(new_node, source, level+1)) READ_ERROR("Can`t continue a recurs\n");
-
-        if (_node_link(root, new_node)) READ_ERROR("Can`t link a node\n");
-
-        (*source)++;
-
-        if (_node_fread_preorder(root, source, level)) READ_ERROR("Can`t continue a recurs\n");
         return 0;
     }
 
-    if (**source == '}' || **source == '\0') return 0;
-
-    fprintf(stderr, RED"WRONG char['%c'] to read\n"DEFUALT, **source);
-    return -1;
+    SHIFT_PTR(offset);
+    return 1;
 }
 
-static int _node_fread_inorder(Node_t* root, char** source $(, int level))
+static Node_t* _node_fread_preorder(char** source $(, int level))
 {
     START_FUNC
 
-
-
-    $(printf("before reading a node cur_char = '%c'\n", **source));
-    $(printf("cur_level = %d\n", level));
+    $(printf("cur level = <%d>\n", level));
     if (**source == '{')
     {
+        SHIFT_PTR(1);
+
+        if (is_nil(source)) return NULL;
         Node_t* new_node = _node_create();
-        
-        if (_node_fread_preorder(new_node, source $(, level+1))) READ_ERROR("Can`t continue a recurs\n");
-        (*source)++;
 
-        int offset = 0;
-        Elem_t val = PZ;
+        if (_node_read_val(new_node, source)) READ_ERROR("Wrong val in node\n");
 
-        if (sscanf(*source, FMT"%n", &val, &offset) != 1) 
-        {   
-            char temp = 0;
-            if (sscanf(*source, "{nil}%n%c", &offset, &temp) == 1)
-            {
-                (*source) = (*source) + offset;
-                if (_node_fread_preorder(root, source, level)) READ_ERROR("Can`t continue a recurs\n");
-                return 0;
-            }        
-        
-            READ_ERROR("Not val in node\n");
-        }
-        
-        *source = (*source) + offset;
+        Node_t* left_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, left_node, LEFT);
 
-        $(printf("after reading a node cur_char = '%c' val = <"FMT">\n", **source, val));
-        
-        
-        if (_node_link(root, new_node)) READ_ERROR("Can`t link a node\n");
+        Node_t* right_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, right_node, RIGHT);
+    
+        SHIFT_PTR(1);
 
-        
-
-        if (_node_fread_preorder(root, source $(, level))) READ_ERROR("Can`t continue a recurs\n");
-        return 0;
+        END_FUNC
+        return new_node;
     }
 
-    if (**source == '}' || **source == '\0') return 0;
-
-    fprintf(stderr, RED"WRONG char['%c'] to read\n"DEFUALT, **source);
-    return -1;
+    READ_ERROR("Can`t continue recursion\n");
 }
 
-// static int _node_fread_postorder(Node_t* root, char** source)
-// {
-//     return 0;
-// }
+static Node_t* _node_fread_inorder(char** source $(, int level))
+{
+    START_FUNC
+
+    $(printf("cur level = <%d>\n", level));
+    if (**source == '{')
+    {
+        SHIFT_PTR(1);
+
+        if (is_nil(source)) return NULL;
+        Node_t* new_node = _node_create();
+
+        Node_t* left_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, left_node, LEFT);
+
+        if (_node_read_val(new_node, source)) READ_ERROR("Wrong val in node\n");
+
+        Node_t* right_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, right_node, RIGHT);
+    
+        SHIFT_PTR(1);
+
+        END_FUNC
+        return new_node;
+    }
+
+    READ_ERROR("Can`t continue recursion\n");
+}
+
+static Node_t* _node_fread_postorder(char** source $(, int level))
+{
+     START_FUNC
+
+    $(printf("cur level = <%d>\n", level));
+    if (**source == '{')
+    {
+        SHIFT_PTR(1);
+
+        if (is_nil(source)) return NULL;
+        Node_t* new_node = _node_create();
+
+        Node_t* left_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, left_node, LEFT);
+
+        Node_t* right_node = _node_fread_preorder(source $(, level+1));
+        _node_link(new_node, right_node, RIGHT);
+
+        if (_node_read_val(new_node, source)) READ_ERROR("Wrong val in node\n");
+
+        SHIFT_PTR(1);
+
+        END_FUNC
+        return new_node;
+    }
+
+    READ_ERROR("Can`t continue recursion\n");
+}
 
 
-static int (*_node_fread_funcs[])(Node_t* root, char** source $(, int level)) = 
+static Node_t* (*_node_fread_funcs[])(char** source $(, int level)) = 
 {
     _node_fread_preorder, 
     _node_fread_inorder, 
-    // _node_fread_postorder
+    _node_fread_postorder
 };
 
 static size_t get_file_size(const char* filename)
@@ -151,8 +166,8 @@ Tree_t* fread_tree(const char* filename, TREE_IO_MODE mode)
     char* source = buffer;
 
     Tree_t* tree = tree_create();
-    tree_init(tree, PZ);
-    if (_node_fread_funcs[mode](tree->root, &source, 0)) 
+    printf("tree = [%p]", tree);
+    if (!(tree->root = _node_fread_funcs[mode](&source $(, 0))))
     {
         fprintf(stderr, RED"ERROR while reading a tree\n"DEFUALT);
         return HUYNA;

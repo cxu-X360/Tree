@@ -97,12 +97,7 @@ Tree_t* fread_tree(const char* file_name, TREE_IO_MODE mode);
 Node_t* _node_create();
 int _node_init(Node_t* node, Elem_t val);
 Node_t* _node_insert(Node_t* cur_node, Elem_t val);
-int _node_link(Node_t* parent, Node_t* child);
+int _node_link(Node_t* parent, Node_t* child, LINK_SIDE side);
 
-
-
-#define Elem_t double
-#define FMT "%lg"
-#define PZ NAN
 
 #endif

@@ -140,7 +140,7 @@ Node_t* _node_insert(Node_t* cur_node, Elem_t val)
     return cur_node;
 }
 
-int _node_link(Node_t* parent, Node_t* child)
+int _node_link(Node_t* parent, Node_t* child, LINK_SIDE side)
 {
     if (!parent)
     {
@@ -148,8 +148,13 @@ int _node_link(Node_t* parent, Node_t* child)
         return PARENT_NULL_PTR;  
     }
 
-    if (!parent->left) parent->left = child;
-    else parent->right = child;
+    if (side == LEFT) parent->left = child;
+    else if (side == RIGHT) parent->right = child;
+    else
+    {
+        fprintf(stderr, RED"Wrong side\n"DEFUALT);
+        return WRONG_LINK_SIDE;
+    }
     
     return 0;
 }
