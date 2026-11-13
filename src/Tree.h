@@ -42,7 +42,8 @@ typedef enum
 {
     HUYNA_PTR_TREE = -1,
     HUYNA_PTR_ROOT = -2,
-    WRONG_VALUES = -3,
+    PARENT_NULL_PTR = -3,
+    WRONG_LINK_SIDE = -4,
 
     COUNT_ERRORS,
 } Tree_err;
@@ -50,14 +51,18 @@ typedef enum
 
 typedef enum
 {
-    CLASSIC = 0,
-    PREORDER = 1,
-    INORDER = 2,
-    POSTORDER = 3,
-    COUNT_PRINT_MODES,
-} TREE_PRINT_MODE;
-#define TREE_READ_MODE TREE_PRINT_MODE
-#define COUNT_READ_MODES COUNT_PRINT_MODES
+    PREORDER = 0,
+    INORDER,
+    POSTORDER,
+    CLASSIC,
+    COUNT_MODES,
+} TREE_IO_MODE;
+
+typedef enum
+{
+    LEFT = 0,
+    RIGHT = -1,
+} LINK_SIDE;
 
 typedef struct _node_t
 {
@@ -75,23 +80,29 @@ typedef struct
     int height;
 } Tree_t;
 
-Tree_t* tree_create(Elem_t val);
+Tree_t* tree_create();
+int tree_init(Tree_t* tree, Elem_t val);
 void tree_destroy(Tree_t* tree);
 
 int tree_insert(Tree_t* tree, Elem_t val);
-
-void fprint_tree(FILE* stream, Tree_t* tree, TREE_PRINT_MODE mode);
+void fprint_tree(FILE* stream, Tree_t* tree, TREE_IO_MODE mode);
 
 int tree_verificator(Tree_t* tree);
 void tree_dump(Tree_t* tree);
 void graph_script_geenrate(Tree_t* tree, int* dump_num);
 
-Tree_t* fread_tree(FILE* stream, TREE_READ_MODE mode);
+Tree_t* fread_tree(const char* file_name, TREE_IO_MODE mode);
+
+
+Node_t* _node_create();
+int _node_init(Node_t* node, Elem_t val);
+Node_t* _node_insert(Node_t* cur_node, Elem_t val);
+int _node_link(Node_t* parent, Node_t* child);
+
 
 
 #define Elem_t double
 #define FMT "%lg"
 #define PZ NAN
-
 
 #endif

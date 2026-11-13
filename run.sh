@@ -17,7 +17,7 @@ clear_dir()
 
 clear_log()
 {
-	clear_dir logs/text_logs/
+	rm logs/text_logs/log.txt #clear_dir logs/text_logs/
 	clear_dir logs/dot-files/
 	clear_dir logs/pictures/
 	echo "logs deleted"
@@ -25,7 +25,7 @@ clear_log()
 
 clear
 clear_log
-gcc -Wall -Wextra -Wshadow -Wconversion -Wunused  main.c src/Tree_implement.c src/debug_impliment.c src/graph_manager.c src/Tree_printer.c -o main.out
+gcc -Wall -Wextra -Wshadow -Wconversion -Wunused "$1" src/Tree_implement.c src/debug_impliment.c src/graph_manager.c src/Tree_printer.c src/Tree_reader.c -o main.out
 pause
 time ./main.out
 

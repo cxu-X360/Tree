@@ -1,25 +1,26 @@
+#include <stddef.h>
 #define DEBUG
 #include "Tree.h"
 
 
-static Node_t* _node_create(Elem_t val)
+Node_t* _node_create()
 {
     START_FUNC
 
     Node_t* node_ptr = (Node_t*) calloc(1, sizeof(Node_t));
     if (!node_ptr)
     {
-        fprintf(stderr, "HUYNA PTR of node\n");
+        fprintf(stderr, RED"HUYNA PTR of node\n"DEFUALT);
         return HUYNA;
     }
 
-    *node_ptr = (Node_t) {.val = val, .left = HUYNA, .right = HUYNA};
+    *node_ptr = (Node_t) {.val = PZ, .left = HUYNA, .right = HUYNA};
 
     END_FUNC
     return node_ptr;
 }
 
-Tree_t* tree_create(Elem_t val)
+Tree_t* tree_create()
 {
     START_FUNC
 
@@ -27,20 +28,60 @@ Tree_t* tree_create(Elem_t val)
 
     if (tree == HUYNA)
     {
-        fprintf(stderr, "HUYNA ptr tree\n");
+        fprintf(stderr, RED"HUYNA ptr tree\n"DEFUALT);
         tree->error = HUYNA_PTR_TREE;
         return HUYNA;
     }
     
-    tree->root = _node_create(val);
-
-    CHECK(tree);
+    tree->root = NULL;
 
     END_FUNC
     return tree;
 }
 
-static int _node_destroy(Node_t* node)
+int _node_init(Node_t* node, Elem_t val)
+{
+    START_FUNC
+
+    if(!node)
+    {
+        fprintf(stderr, RED"Cannot inti node cause of NULL ptr in it\n"DEFUALT); 
+        return -1;
+    }
+
+    node->val = val;
+
+    return 0;
+
+    END_FUNC
+}
+
+int tree_init(Tree_t* tree, Elem_t val)
+{
+    START_FUNC
+
+    if (!tree)
+    {
+        fprintf(stderr, RED"Cannot init tree cause of NULL ptr on it\n"DEFUALT); 
+        return HUYNA_PTR_TREE;
+    }
+
+    Node_t* root = _node_create();
+    if (_node_init(root, val))
+    {
+        fprintf(stderr, RED"Cannot create a root of tree(\n"DEFUALT);
+        return HUYNA_PTR_ROOT;
+    }
+
+    tree->root = root; 
+    tree->height = 1;
+    
+    END_FUNC
+
+    return 0;
+}
+
+int _node_destroy(Node_t* node)
 {
     START_FUNC
     
@@ -73,7 +114,7 @@ void tree_destroy(Tree_t* tree)
     END_FUNC
 }
 
-static Node_t* _node_insert(Node_t* cur_node, Elem_t val)
+Node_t* _node_insert(Node_t* cur_node, Elem_t val)
 {
     START_FUNC
     $(printf("set_val = "FMT", cur node = [ptr = [%p], val = <"FMT">, left = [%p], right = [%p]\n", 
@@ -82,7 +123,9 @@ static Node_t* _node_insert(Node_t* cur_node, Elem_t val)
     if (!cur_node)
     {
         $(printf("create node\n");)
-        return _node_create(val);
+        cur_node = _node_create();
+        _node_init(cur_node, val);
+        return cur_node;
     }
 
     if (val > cur_node->val)
@@ -95,6 +138,20 @@ static Node_t* _node_insert(Node_t* cur_node, Elem_t val)
     $(printf("left insert\n");)
     cur_node->left = _node_insert(cur_node->left, val);
     return cur_node;
+}
+
+int _node_link(Node_t* parent, Node_t* child)
+{
+    if (!parent)
+    {
+        fprintf(stderr, RED"Can`t link a node cause null ptr parent\n"DEFUALT);
+        return PARENT_NULL_PTR;  
+    }
+
+    if (!parent->left) parent->left = child;
+    else parent->right = child;
+    
+    return 0;
 }
 
 int tree_insert(Tree_t* tree, Elem_t val)

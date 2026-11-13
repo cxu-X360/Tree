@@ -30,7 +30,8 @@ int main()
 {
     Elem_t start_val = (Elem_t) 56;
 
-    Tree_t* main_tree = tree_create(start_val);
+    Tree_t* main_tree = tree_create();
+    tree_init(main_tree, start_val);
 
     for (int i = 0; i < 100; i+=10)
     {
